@@ -1,0 +1,23 @@
+[T n_seq] = size(X)
+
+q = cell(2,1);
+q{1} = cell(2,1);
+q{2} = cell(2,1);
+
+theta = init_params(q, n_alphabet);
+
+MAX_ITER = 10;
+
+for iter = 1:MAX_ITER
+    
+    theta_new = [];
+    
+    for seq_idx = 1:n_seq
+        
+        [alpha beta eta_in eta_out xi chi p] = infer_hhmm(X(seq_idx), theta);
+        
+        theta_seq = maximize_hhmm(xi, chi);
+    
+        theta_new = sum_params(theta_new, theta_seq);
+    end
+    

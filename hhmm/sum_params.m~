@@ -1,0 +1,16 @@
+function [theta] = sum_params(theta_sum, theta_seq)
+
+if isempty(theta_sum)
+    theta_sum = theta_seq;
+elseif ~isstruct(theta_sum)
+    theta_sum = theta_sum + theta_seq;
+else
+    theta.pi = theta_sum.pi + theta_seq.pi;
+    theta.A = theta_sum.A + theta_sum.A;
+    
+    
+    for i = 1:size(theta.subs,1)
+        
+
+end
+

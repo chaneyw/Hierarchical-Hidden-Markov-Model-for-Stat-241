@@ -1,0 +1,106 @@
+rng(4);
+
+text = fileread('alice_in_wonderland.txt');
+alphabet = unique(text);
+n_alphabet = length(alphabet);
+
+n_seq = 100;
+X = cell(n_seq,1);
+seq_length = 10;
+for i = 1:n_seq
+    t_start = randi(length(text) - seq_length);
+    string = text(t_start:(t_start+seq_length - 1))
+    X{i} = string_to_indices(string, alphabet);
+end
+
+
+
+% X = [1 1;
+%      1 2;
+%      2 1;
+%      2 2];
+
+q = cell(2,1);
+q{1} = cell(2,1);
+q{2} = cell(2,1);
+
+% q{1}{2} = cell(3,1);
+% q{1}{1} = cell(3,1);
+% q{1}{1}{2} = cell(5,1);
+
+% n_alphabet = 2;
+% seq_length = 4;
+% theta_truth = init_params(q, n_alphabet);
+% n_samples = 100;
+% X = zeros(n_samples, seq_length);
+% for i = 1:n_samples
+%     seq = [];
+%     while(true)
+%         seq = sample_hhmm(theta_truth, [], seq_length);
+%         if length(seq) == seq_length
+%             break;
+%         end
+%     end
+%     X(i,:) = seq;
+% end
+
+
+n_alphabet = 4;
+theta_
+truth = init_params(q, n_alphabet);
+
+
+% max_seq_length = 100;
+% n_seq = 100;
+% X = cell(n_seq,1);
+% for i = 1:n_seq
+%     X{i} = sample_hhmm(theta_truth, [], max_seq_length);
+% end
+
+
+
+
+n_samples = 10;
+seq_count = zeros(n_seq,1);
+for i = 1:n_samples
+    seq = sample_hhmm(theta_truth, [], max_seq_length);
+    for j = 1:n_seq
+        if length(seq) == length(X{j}) && all(seq == X{j})
+            seq_count(j) = seq_count(j) + 1;
+        end
+    end
+end
+p_sampler = seq_count/n_samples;
+
+log_p = zeros(n_seq,1);
+log_p_test = zeros(n_seq,1);
+
+theta = theta_truth;%init_params(q, n_alphabet);
+max_iter = 10;
+for iter = 1:max_iter
+    
+    theta_new = [];
+    
+    
+    for seq_idx = 1:n_seq
+        
+        %seq_idx
+        
+        x = X{seq_idx};
+        
+        sstats = init_sstats(q, length(x));
+        
+        [sstats log_p(seq_idx) log_p_test(seq_idx)] = infer_hhmm(x, theta, sstats);
+         
+        theta_seq = maximize_hhmm(sstats, theta, x);
+    
+        theta_new = sum_params(theta_new, theta_seq);
+    end
+    
+    mean_log_p = log_sum_exp(log_p)
+    
+    theta = normalize_params(theta_new);
+end
+
+p = exp(log_p)
+p_test = exp(log_p)

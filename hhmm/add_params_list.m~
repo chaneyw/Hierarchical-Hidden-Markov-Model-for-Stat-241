@@ -1,0 +1,21 @@
+% Adds the all soft counts from count_seq to the counts sum 
+function [counts_sum] = add_params_list(counts_sum, counts_seq)
+n_seq = length(counts_seq);
+
+if counts_sum.isleaf
+    for i = 1:n_seq
+        counts_sum.B = counts_sum.B + counts_seq{i}.B;
+    end
+else
+    for i = 1:n_seq    
+        counts_sum.pi = counts_sum.pi + counts_seq{i}.pi;
+        counts_sum.A = counts_sum.A + counts_seq{i}.A;
+    
+    
+    for c = 1:size(theta_seq.subs,1)
+        counts_sum.subs{i} = sum_params_list(theta_sum.subs{i}, theta_seq.subs{i});
+    end
+end
+
+end
+

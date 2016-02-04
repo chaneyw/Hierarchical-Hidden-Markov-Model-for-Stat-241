@@ -1,0 +1,26 @@
+function [sstats log_p log_p] = infer_hhmm(x, theta, sstats)
+
+T = length(x);
+
+sstats = infer_alpha(x, theta, sstats);
+sstats = infer_beta(x, theta, sstats);
+sstats = infer_eta_in(x, theta, sstats);
+sstats = infer_eta_out(x, theta, sstats);
+
+lp_child_end = zeros(size(sstats));
+lp_test = zeros(size(sstats));
+
+t_test = randi(T);
+for i = 1:size(sstats.subs,1)
+    lp_child_end(i) = sstats.subs{i}.lalpha(1,T) + theta.lA(i,end);
+    lp_test(i) = sstats.subs{i}.leta_in(t_test) + sstats.subs{i}.lbeta(t_test, T); 
+end
+log_p = log_sum_exp(lp_child_end);
+log_p_test = log_sum_exp(lp_test);
+
+sstats = infer_xi(x, theta, sstats, log_p);
+sstats = infer_chi(x, theta, sstats, log_p);
+
+
+end
+

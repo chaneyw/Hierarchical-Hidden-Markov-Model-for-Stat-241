@@ -1,0 +1,54 @@
+function theta_seq = maximize_hhmm(sstats, theta, x)
+
+    theta_seq = maximize_hhmm_rec(sstats.subs{child_idx},...
+                                                 theta.subs{child_idx}, x);
+end
+ 
+end
+
+function theta_seq = maximize_hhmm_rec(sstats, theta, x, isroot)
+
+% start by copying over the structure
+theta_seq = theta;
+
+if isroot
+    theta_seq.pi = exp(sstats.lchi(:,1));
+    isroot = false;
+end
+
+chi = exp(sstats.lchi);
+xi = exp(sstats.lxi);
+
+% This sequence contributes a sum across its length of soft counts
+% the vertical and horizontal transition probabilities
+theta_seq.pi = sum(chi, 2);
+theta_seq.A = sum(xi, 3);
+
+n_child = size(sstats.subs,1);
+for child_idx = 1:n_child
+    
+    if sstats.subs{child_idx}.isleaf
+
+        % This sequence contributes a soft count of the probability that
+        % that hhmm was in this state when a symbol was generated to propriate
+        % symbol in B
+        for symbol_idx = 1:size(theta.subs{child_idx}.B,1)
+            % two ways it might have been in this state: it came for from a
+            % parent or it came from  sibling after the first time step
+            from_parent = chi(child_idx, :);
+            from_parent = sum(from_parent(x == symbol_idx));
+            
+            from_sib = sum(squeeze(xi(:, child_idx, :)), 2);
+            from_sib = from_sib(x == symbol_idx);
+            from_sib = sum(from_sib(2:end));
+            
+            theta.B = from_parent + from_sib;
+        end
+    else
+        theta_seq.subs{child_idx} = maximize_hhmm_rec(sstats.subs{child_idx},... 
+                                                      theta.subs{child_idx}, x);
+    end
+    
+end
+    
+end

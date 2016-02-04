@@ -1,0 +1,17 @@
+function [theta] = normalize_params(theta_new)
+
+if theta.isleaf
+    theta.B = theta_new.B/sum(theta_new.B);
+    theta.lB = log(theta_new.B);
+else
+    theta.pi = theta.pi/sum(theta_new.pi);
+    theta.lpi = log(theta_new.pi);
+    theta.A = bsxfun(@rdivide, theta.A, sum(theta_new.A,2));
+    theta.lA = log(theta.A);
+    
+    for i = 1:size(theta.subs,1)
+        theta.subs{i} = normalize_params(theta.subs{i});
+    end
+end
+
+end
